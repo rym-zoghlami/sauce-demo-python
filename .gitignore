@@ -1,0 +1,32 @@
+# Fichiers Python temporaires
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environnements virtuels
+venv/
+env/
+
+# Rapports de test
+reports/
+htmlcov/
+.coverage
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers d'IDE/Editeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Fichiers de données de test
+*.log
+*.tmp
+
+# Fichiers de coverage
+.coverage
+.coverage.*
