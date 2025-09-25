@@ -1,95 +1,79 @@
 import allure
 import pytest
-from pages.inventory_page import InventoryPage
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 import time
 
 class TestInventory:
     
     @allure.feature("Inventory")
     @allure.story("Display products")
-    def test_display_products(self, login, inventory_page):
+    def test_display_products(self, inventory_page):
         """Test that products are displayed on the inventory page"""
-        with allure.step("Verify products are displayed"):
-            assert inventory_page.get_products_count() > 0
+        product_count = inventory_page.get_products_count()
+        print(f"📊 Produits affichés: {product_count}")
+        assert product_count > 0
     
     @allure.feature("Inventory")
     @allure.story("Add item to cart")
-    def test_add_item_to_cart(self, login, inventory_page):
+    def test_add_item_to_cart(self, inventory_page):
         """Test adding an item to the cart"""
-        with allure.step("Add item to cart"):
-            initial_count = inventory_page.get_cart_count()
-            inventory_page.add_item_to_cart()
-            
-        with allure.step("Wait for cart update and verify"):
-            # Attendre que le panier se mette à jour
-            try:
-                WebDriverWait(inventory_page.driver, 10).until(
-                    lambda driver: inventory_page.get_cart_count() == initial_count + 1
-                )
-            except:
-                # Debug: afficher le compte actuel du panier
-                print(f"Expected: {initial_count + 1}, Got: {inventory_page.get_cart_count()}")
-                print(f"Page title: {inventory_page.driver.title}")
-                raise
-            
-            assert inventory_page.get_cart_count() == initial_count + 1
+        initial_count = inventory_page.get_cart_count()
+        print(f"🛒 Compteur initial: {initial_count}")
+        
+        inventory_page.add_item_to_cart(0)
+        
+        # Attendre et vérifier
+        time.sleep(3)
+        final_count = inventory_page.get_cart_count()
+        print(f"🛒 Compteur final: {final_count}")
+        
+        assert final_count == initial_count + 1, f"Attendu: {initial_count + 1}, Obtenu: {final_count}"
     
     @allure.feature("Inventory")
     @allure.story("Remove item from cart")
-    def test_remove_item_from_cart(self, login, inventory_page):
+    def test_remove_item_from_cart(self, inventory_page):
         """Test removing an item from the cart"""
-        with allure.step("Add then remove item from cart"):
-            # D'abord ajouter un article
-            inventory_page.add_item_to_cart()
-            
-            # Attendre l'ajout
-            WebDriverWait(inventory_page.driver, 10).until(
-                lambda driver: inventory_page.get_cart_count() == 1
-            )
-            
-            # Maintenant retirer l'article
-            inventory_page.remove_item_from_cart()
-            
-        with allure.step("Wait for cart update and verify"):
-            # Attendre la suppression
-            try:
-                WebDriverWait(inventory_page.driver, 10).until(
-                    lambda driver: inventory_page.get_cart_count() == 0
-                )
-            except:
-                print(f"Cart count after removal: {inventory_page.get_cart_count()}")
-                raise
-            
-            assert inventory_page.get_cart_count() == 0
+        # Ajouter un article
+        inventory_page.add_item_to_cart(0)
+        time.sleep(2)
+        
+        count_after_add = inventory_page.get_cart_count()
+        print(f"🛒 Après ajout: {count_after_add}")
+        assert count_after_add == 1
+        
+        # Retirer l'article
+        inventory_page.remove_item_from_cart(0)
+        time.sleep(3)
+        
+        final_count = inventory_page.get_cart_count()
+        print(f"🛒 Après suppression: {final_count}")
+        assert final_count == 0
     
     @allure.feature("Inventory") 
     @allure.story("Sort products low to high")
-    def test_sort_products_low_high(self, login, inventory_page):
+    def test_sort_products_low_high(self, inventory_page):
         """Test sorting products by price low to high"""
-        with allure.step("Sort products by price low to high"):
-            inventory_page.sort_products("lohi")
-            
-        with allure.step("Verify products are sorted correctly"):
-            prices = inventory_page.get_product_prices()
-            assert prices == sorted(prices)
+        inventory_page.sort_products("lohi")
+        
+        prices = inventory_page.get_product_prices()
+        print(f"📈 Prix triés: {prices}")
+        assert prices == sorted(prices)
     
     @allure.feature("Inventory")
     @allure.story("Go to cart")
-    def test_go_to_cart(self, login, inventory_page):
+    def test_go_to_cart(self, inventory_page):
         """Test navigating to the cart page"""
-        with allure.step("Navigate to cart page"):
-            cart_page = inventory_page.go_to_cart()
-            
-        with allure.step("Verify cart page is displayed"):
-            try:
-                WebDriverWait(inventory_page.driver, 10).until(
-                    EC.title_contains("Cart")
-                )
-            except:
-                print(f"Current page title: {inventory_page.driver.title}")
-                raise
-            
-            assert "cart" in inventory_page.driver.current_url.lower()
+        # Ajouter un article
+        inventory_page.add_item_to_cart(0)
+        time.sleep(2)
+        
+        cart_page = inventory_page.go_to_cart()
+        time.sleep(2)
+        
+        # Vérifier la page panier
+        current_url = cart_page.driver.current_url
+        print(f"🌐 URL panier: {current_url}")
+        assert "cart" in current_url
+        
+        # Vérifier le titre
+        cart_title = cart_page.get_cart_title()
+        assert "cart" in cart_title.lower()

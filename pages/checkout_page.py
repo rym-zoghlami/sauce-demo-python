@@ -12,7 +12,6 @@ class CheckoutPage(BasePage):
     
     def __init__(self, driver):
         super().__init__(driver)
-        self.driver = driver
     
     def enter_first_name(self, first_name):
         self.type_text(self.FIRST_NAME_INPUT, first_name)
@@ -32,7 +31,7 @@ class CheckoutPage(BasePage):
     
     def cancel_checkout(self):
         self.click(self.CANCEL_BUTTON)
-        from .cart_page import CartPage
+        from pages.cart_page import CartPage
         return CartPage(self.driver)
     
     def get_error_message(self):
